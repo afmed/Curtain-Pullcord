@@ -39,6 +39,20 @@ AccelStepper   stepper(AccelStepper::DRIVER, STEP_PIN, DIR_PIN);
 TMC2209Stepper driver(&STEPPER_SERIAL, R_SENSE, DRIVER_ADDRESS);
 Preferences    preferences;
 
+void preferencesConfigure() {
+  preferences.begin("curtainsettings", false);
+
+  TCOOL_THRESHOLD       = preferences.getInt("TCOOL_THRESHOLD", 570);
+  STALLGUARD_THRESHOLD  = preferences.getInt("STALLGUARD_THRESHOLD", 100);
+  STEPPER_SPEED         = preferences.getInt("STEPPER_SPEED", 8000);
+  STEPPER_ACCELERATION  = preferences.getInt("STEPPER_ACCELERATION", 50000);
+  RMSCURRENT            = preferences.getInt("RMSCURRENT", 2000);
+  MICROSTEPPING         = preferences.getInt("MICROSTEPPING", 16);
+  MOVE_SMALL            = preferences.getInt("MOVE_SMALL", 1000);
+  MOVE_FULL             = preferences.getInt("MOVE_FULL", 100000);
+
+}
+
 void showDriverSettings() {
   Serial.println("------------------------------");
   Serial.println("      CONFIGURED SETTINGS");
@@ -99,20 +113,6 @@ void IRAM_ATTR stallMotor() {
     stallCount = 0;
   } 
   Serial.printf("STALL DETECTED - TCOOL: %i - StallCount %i \n", TCOOL_THRESHOLD, stallCount);
-}
-
-void preferencesConfigure() {
-  preferences.begin("curtainsettings", false);
-
-  TCOOL_THRESHOLD       = preferences.getInt("TCOOL_THRESHOLD", 570);
-  STALLGUARD_THRESHOLD  = preferences.getInt("STALLGUARD_THRESHOLD", 100);
-  STEPPER_SPEED         = preferences.getInt("STEPPER_SPEED", 8000);
-  STEPPER_ACCELERATION  = preferences.getInt("STEPPER_ACCELERATION", 50000);
-  RMSCURRENT            = preferences.getInt("RMSCURRENT", 2000);
-  MICROSTEPPING         = preferences.getInt("MICROSTEPPING", 16);
-  MOVE_SMALL            = preferences.getInt("MOVE_SMALL", 1000);
-  MOVE_FULL             = preferences.getInt("MOVE_FULL", 100000);
-
 }
 
 void setup() {

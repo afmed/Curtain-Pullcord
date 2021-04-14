@@ -12,14 +12,14 @@
 #define R_SENSE 0.15f // Sense Resistor Value
 #define DRIVER_ADDRESS 0b00  // Stepper Driver Address
 
-int RMSCURRENT = 2000; 
-int MICROSTEPPING = 16; // Default Microstepping Value
-int STEPPER_ACCELERATION = 50000; 
-int STEPPER_SPEED = 8000;
-int STALLGUARD_THRESHOLD = 100; // [0..255] 
-int TCOOL_THRESHOLD  = ((3089838.00*pow(STEPPER_SPEED,-1.00161534))*1.5);
-int MOVE_SMALL = 1000;
-int MOVE_FULL = 100000;
+int RMSCURRENT ; //= 2000; 
+int MICROSTEPPING ; //= 16; // Default Microstepping Value
+int STEPPER_ACCELERATION ;//= 50000; 
+int STEPPER_SPEED ; //= 8000;
+int STALLGUARD_THRESHOLD ; //= 100; // [0..255] 
+int TCOOL_THRESHOLD ; //= ((3089838.00*pow(STEPPER_SPEED,-1.00161534))*1.5);
+int MOVE_SMALL ; //= 1000;
+int MOVE_FULL ; //= 100000;
 
 #define BUTTON1 23
 #define BUTTON2 34
@@ -102,8 +102,19 @@ void IRAM_ATTR stallMotor() {
 }
 
 void preferencesConfigure() {
-  preferences.begin("curtainmotor", false);
+  preferences.begin("curtainsettings", false);
+
+  TCOOL_THRESHOLD       = preferences.getInt("TCOOL_THRESHOLD", 570);
+  STALLGUARD_THRESHOLD  = preferences.getInt("STALLGUARD_THRESHOLD", 100);
+  STEPPER_SPEED         = preferences.getInt("STEPPER_SPEED", 8000);
+  STEPPER_ACCELERATION  = preferences.getInt("STEPPER_ACCELERATION", 50000);
+  RMSCURRENT            = preferences.getInt("RMSCURRENT", 2000);
+  MICROSTEPPING         = preferences.getInt("MICROSTEPPING", 16);
+  MOVE_SMALL            = preferences.getInt("MOVE_SMALL", 1000);
+  MOVE_FULL             = preferences.getInt("MOVE_FULL", 100000);
+
 }
+
 void setup() {
 
   Serial.begin(115200);

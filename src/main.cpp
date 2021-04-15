@@ -2,6 +2,14 @@
 #include <AccelStepper.h>
 #include <TMCStepper.h>
 #include <Preferences.h>
+#include "WiFi.h"
+#include "ESPAsyncWebServer.h"
+#include "SPIFFS.h"
+
+
+#if __has_include("config.hpp")
+    #include "config.hpp"
+#endif
 
 #define STEPPER_SERIAL Serial2 // TMC2209 Serial Port 
 #define STEP_PIN  13 // Step Pin
@@ -35,11 +43,57 @@ int MOVE_FULL ; //= 100000;
 int invokeAction = STOP;
 int stallCount = 0;
 
+// webserver vars
+String header;
+unsigned long currentTime = millis();
+unsigned long previousTime = 0; 
+const long timeoutTime = 2000;
+
+
+
 AccelStepper   stepper(AccelStepper::DRIVER, STEP_PIN, DIR_PIN);
 TMC2209Stepper driver(&STEPPER_SERIAL, R_SENSE, DRIVER_ADDRESS);
 Preferences    preferences;
+AsyncWebServer server(80);
 
-void preferencesConfigure() {
+String processor(const String& var){
+  Serial.println(var);
+  if(var == "TITLE"){
+    return "Lounge Front Right";
+  }
+  return String();
+}
+
+void spiffsSetup() {
+  if(!SPIFFS.begin(true)){
+    Serial.println("An Error has occurred while mounting SPIFFS");
+    return;
+  }
+}
+
+void wirelessSetup() {
+  // Connect to Wi-Fi network with SSID and password
+  Serial.printf("Connecting to %s", ssid);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(100);
+    Serial.print(".");
+  }
+  // Print local IP address and start web server
+  Serial.println("");
+  Serial.println("WiFi connected.");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+}
+
+void webserverSetup() {
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(SPIFFS, "/index.htm", String(), false, processor);
+  });
+  server.begin();
+}
+
+void preferencesSetup() {
   preferences.begin("curtainsettings", false);
 
   TCOOL_THRESHOLD       = preferences.getInt("TCOOL_THRESHOLD", 570);
@@ -77,7 +131,7 @@ void showDriverData() {
   Serial.println("------------------------------");
 }
 
-void driverConfigure() {
+void driverSetup() {
   STEPPER_SERIAL.begin(115200); 
   driver.pdn_disable(true);
   driver.begin();
@@ -121,8 +175,11 @@ void setup() {
   while(!Serial);
   Serial.println("Start...");
   
-  preferencesConfigure();
-
+  spiffsSetup();
+  preferencesSetup();
+  wirelessSetup();
+  webserverSetup();
+ 
   pinMode(BUTTON1,INPUT);
   pinMode(BUTTON2,INPUT);
   pinMode(BUTTON3,INPUT);
@@ -136,57 +193,57 @@ void setup() {
 
   attachInterrupt(DIAG_PIN, stallMotor, RISING);
 
-  driverConfigure();
+  driverSetup();
   showDriverSettings();
 
 }
 
 void loop() {
-    
-    if (digitalRead(BUTTON1)==HIGH) {
-      stepper.move(MOVE_FULL);
-      if (invokeAction == IDLE) {invokeAction = INIT;}
+  
+  if (digitalRead(BUTTON1)==HIGH) {
+    stepper.move(MOVE_FULL);
+    if (invokeAction == IDLE) {invokeAction = INIT;}
+  }
+
+  if (digitalRead(BUTTON2)==HIGH) {
+    stepper.move(MOVE_SMALL);
+    if (invokeAction == IDLE) {invokeAction = INIT;}
+  }
+
+  if (digitalRead(BUTTON3)==HIGH && invokeAction==MOVE) {
+    stepper.move(0);
+  }
+
+  if (digitalRead(BUTTON3)==HIGH && invokeAction==IDLE) {
+    showDriverData();
+  }
+
+  if (digitalRead(BUTTON4)==HIGH) {
+    stepper.move(-MOVE_SMALL);
+    if (invokeAction == IDLE) {invokeAction = INIT;}
+  }
+
+  if (digitalRead(BUTTON5)==HIGH) {
+    stepper.move(-MOVE_FULL);
+    if (invokeAction == IDLE) {invokeAction = INIT;}
+  }
+
+  if (invokeAction==STOP) {
+    stepper.disableOutputs();
+    invokeAction = IDLE;
+    stallCount = 0;
+  } 
+
+  if (invokeAction==INIT) {
+    driverInitialise();
+    invokeAction = MOVE;
+  } 
+
+  if (invokeAction==MOVE) {
+    stepper.run();
+
+    if (stepper.distanceToGo() == 0) {
+      invokeAction = STOP;
     }
-
-    if (digitalRead(BUTTON2)==HIGH) {
-      stepper.move(MOVE_SMALL);
-      if (invokeAction == IDLE) {invokeAction = INIT;}
-    }
-
-    if (digitalRead(BUTTON3)==HIGH && invokeAction==MOVE) {
-      stepper.move(0);
-    }
-
-    if (digitalRead(BUTTON3)==HIGH && invokeAction==IDLE) {
-      showDriverData();
-    }
-
-    if (digitalRead(BUTTON4)==HIGH) {
-      stepper.move(-MOVE_SMALL);
-      if (invokeAction == IDLE) {invokeAction = INIT;}
-    }
-
-    if (digitalRead(BUTTON5)==HIGH) {
-      stepper.move(-MOVE_FULL);
-      if (invokeAction == IDLE) {invokeAction = INIT;}
-    }
-
-    if (invokeAction==STOP) {
-      stepper.disableOutputs();
-      invokeAction = IDLE;
-      stallCount = 0;
-    } 
-
-    if (invokeAction==INIT) {
-      driverInitialise();
-      invokeAction = MOVE;
-    } 
-
-    if (invokeAction==MOVE) {
-      stepper.run();
-
-      if (stepper.distanceToGo() == 0) {
-        invokeAction = STOP;
-      }
-    }
+  }
 }

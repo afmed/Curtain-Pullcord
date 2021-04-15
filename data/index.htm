@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.1/css/all.css" integrity="sha384-O8whS3fhG2OnA5Kas0Y9l3cfpmYjapjI0E4theH4iuMD+pLhbf6JI0jIMfYcK3yZ" crossorigin="anonymous">
+    <style>
+        input { text-align: center; }
+    </style>
+    <script>
+        $(document).ready(function(){
+
+            $('#velocity_plus-btn').click(function() {$('#velocity_input').val(parseInt($('#velocity_input').val()) + 100 );if ($('#velocity_input').val() > 10000) {$('#velocity_input').val(10000);}});
+            $('#velocity_minus-btn').click(function(){$('#velocity_input').val(parseInt($('#velocity_input').val()) - 100 );if ($('#velocity_input').val() == 0) {$('#velocity_input').val(1);}});
+
+            $('#current_plus-btn').click(function() {$('#current_input').val(parseInt($('#current_input').val()) + 100 );if ($('#current_input').val() > 10000) {$('#current_input').val(10000);}});
+            $('#current_minus-btn').click(function(){$('#current_input').val(parseInt($('#current_input').val()) - 100 );if ($('#current_input').val() == 0) {$('#current_input').val(1);}});
+
+        });
+
+    </script>
+    <title>%TITLE%</title>
+  </head>
+  <body>
+    <div class="container" style="margin-top:10px">
+
+    <h2>Curtain Controls - %TITLE%</h2>
+
+    <div class="container mt-5">
+        <div class="row">
+
+            <div class="w-100"></div>
+            <div class="col"><h3>Velocity</h3> </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend"><button class="btn btn-dark btn-sm" id="velocity_minus-btn"><i class="fa fa-minus"></i></button></div>
+                    <input type="number" id="velocity_input" class="form-control form-control-sm" value="1" min="1">
+                    <div class="input-group-prepend"><button class="btn btn-dark btn-sm" id="velocity_plus-btn"><i class="fa fa-plus"></i></button></div>
+                </div>
+            </div>
+
+            <div class="w-100"></div>
+            <div class="col"><h3>Current</h3> </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend"><button class="btn btn-dark btn-sm" id="current_minus-btn"><i class="fa fa-minus"></i></button></div>
+                    <input type="number" id="current_input" class="form-control form-control-sm" value="1" min="1">
+                    <div class="input-group-prepend"><button class="btn btn-dark btn-sm" id="current_plus-btn"><i class="fa fa-plus"></i></button></div>
+                </div>
+            </div>
+
+        </div>
+   </div>
+
+   <hr>
+  </body>
+</html>

@@ -28,6 +28,7 @@ int STALLGUARD_THRESHOLD ; //= 100; // [0..255]
 int TCOOL_THRESHOLD ; //= ((3089838.00*pow(STEPPER_SPEED,-1.00161534))*1.5);
 int MOVE_SMALL ; //= 1000;
 int MOVE_FULL ; //= 100000;
+int MOTOR_INVERT; // 0 = no  1 = yes
 
 #define BUTTON1 23
 #define BUTTON2 34
@@ -48,8 +49,6 @@ String header;
 unsigned long currentTime = millis();
 unsigned long previousTime = 0; 
 const long timeoutTime = 2000;
-
-
 
 AccelStepper   stepper(AccelStepper::DRIVER, STEP_PIN, DIR_PIN);
 TMC2209Stepper driver(&STEPPER_SERIAL, R_SENSE, DRIVER_ADDRESS);
@@ -86,25 +85,140 @@ void wirelessSetup() {
   Serial.println(WiFi.localIP());
 }
 
-void webserverSetup() {
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(SPIFFS, "/index.htm", String(), false, processor);
-  });
-  server.begin();
+void motionMINMIN() {
+  stepper.move(MOVE_FULL);
+  if (invokeAction == IDLE) {invokeAction = INIT;}
+  
+}
+
+void motionMIN() {
+  stepper.move(MOVE_SMALL);
+  if (invokeAction == IDLE) {invokeAction = INIT;}
+
+}
+
+void motionSTOP() {
+    stepper.move(0);
+}
+
+void motionPLU() {
+    stepper.move(-MOVE_SMALL);
+    if (invokeAction == IDLE) {invokeAction = INIT;}
+
+}
+
+void motionPLUPLU() {
+    stepper.move(-MOVE_FULL);
+    if (invokeAction == IDLE) {invokeAction = INIT;}
+
 }
 
 void preferencesSetup() {
   preferences.begin("curtainsettings", false);
 
   TCOOL_THRESHOLD       = preferences.getInt("TCOOL_THRESHOLD", 570);
-  STALLGUARD_THRESHOLD  = preferences.getInt("STALLGUARD_THRESHOLD", 100);
+  STALLGUARD_THRESHOLD  = preferences.getInt("SG_THRESHOLD", 100);
   STEPPER_SPEED         = preferences.getInt("STEPPER_SPEED", 8000);
-  STEPPER_ACCELERATION  = preferences.getInt("STEPPER_ACCELERATION", 50000);
+  STEPPER_ACCELERATION  = preferences.getInt("ACCELERATION", 50000);
   RMSCURRENT            = preferences.getInt("RMSCURRENT", 2000);
   MICROSTEPPING         = preferences.getInt("MICROSTEPPING", 16);
   MOVE_SMALL            = preferences.getInt("MOVE_SMALL", 1000);
   MOVE_FULL             = preferences.getInt("MOVE_FULL", 100000);
+  MOTOR_INVERT          = preferences.getInt("MOTOR_INVERT", 0);
 
+}
+
+void preferencesUpdate( char* setting, int value ) {
+
+  if (strcmp( setting, "stall") == 0) {
+    STALLGUARD_THRESHOLD = value;
+    preferences.putInt("SG_THRESHOLD", value);
+    printf("Updating %s: %u \n", setting, value);
+  }
+
+  if (strcmp( setting, "speed") == 0) {
+    STEPPER_SPEED = value;
+    preferences.putInt("STEPPER_SPEED", value);
+    printf("Updating %s: %u \n", setting, value);
+
+    TCOOL_THRESHOLD = ((3089838.00*pow(STEPPER_SPEED,-1.00161534))*1.5);
+    preferences.putInt("TCOOL_THRESHOLD", TCOOL_THRESHOLD);
+    printf("Updating TCOOL_THRESHOLD: %i \n", TCOOL_THRESHOLD);
+  }
+
+  if (strcmp( setting, "accel") == 0) {
+    STEPPER_ACCELERATION = value;
+    preferences.putInt("ACCELERATION", value);
+    printf("Updating %s: %u \n", setting, value);
+  }
+
+  if (strcmp( setting, "current") == 0) {
+    RMSCURRENT = value;
+    preferences.putInt("RMSCURRENT", value);
+    printf("Updating %s: %u \n", setting, value);
+  }
+
+  if (strcmp( setting, "microstep") == 0) {
+    MICROSTEPPING = value;
+    preferences.putInt("MICROSTEPPING", value);
+    printf("Updating %s: %u \n", setting, value);
+  }
+
+  if (strcmp( setting, "mvsmall") == 0) {
+    MOVE_SMALL = value;
+    preferences.putInt("MOVE_SMALL", value);
+    printf("Updating %s: %u \n", setting, value);
+  }
+
+  if (strcmp( setting, "mvlarge") == 0) {
+    MOVE_FULL = value;
+    preferences.putInt("MOVE_FULL", value);
+    printf("Updating %s: %u \n", setting, value);
+  }
+
+  if (strcmp( setting, "speed") == 0) {
+    MOTOR_INVERT = value;
+    preferences.putInt("MOTOR_INVERT", value);
+    printf("Updating %s: %u \n", setting, value);
+  }
+}
+
+void webserverSetup() {
+  
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(SPIFFS, "/index.htm", String(), false, processor);
+  });
+
+  server.on("/get/speed",      HTTP_GET, [](AsyncWebServerRequest *request){request->send(200, "text/plain", String(STEPPER_SPEED));});
+  server.on("/get/accel",      HTTP_GET, [](AsyncWebServerRequest *request){request->send(200, "text/plain", String(STEPPER_ACCELERATION));});
+  server.on("/get/current",    HTTP_GET, [](AsyncWebServerRequest *request){request->send(200, "text/plain", String(RMSCURRENT));});
+  server.on("/get/stall",      HTTP_GET, [](AsyncWebServerRequest *request){request->send(200, "text/plain", String(STALLGUARD_THRESHOLD));});
+  server.on("/get/microstep",  HTTP_GET, [](AsyncWebServerRequest *request){request->send(200, "text/plain", String(MICROSTEPPING));});
+  server.on("/get/mvlarge",    HTTP_GET, [](AsyncWebServerRequest *request){request->send(200, "text/plain", String(MOVE_FULL));});
+  server.on("/get/mvsmall",    HTTP_GET, [](AsyncWebServerRequest *request){request->send(200, "text/plain", String(MOVE_SMALL));});
+  //server.on("/get/dir",        HTTP_GET, [](AsyncWebServerRequest *request){request->send(200, "text/plain", String(dir));});
+
+  server.on("/post/speed",     HTTP_POST, [](AsyncWebServerRequest *request){AsyncWebParameter *p = request->getParam(0); preferencesUpdate("speed",      p->value().toInt() ); request->send(200, "text/plain");  });
+  server.on("/post/accel",     HTTP_POST, [](AsyncWebServerRequest *request){AsyncWebParameter *p = request->getParam(0); preferencesUpdate("accel",      p->value().toInt() ); request->send(200, "text/plain");  });
+  server.on("/post/current",   HTTP_POST, [](AsyncWebServerRequest *request){AsyncWebParameter *p = request->getParam(0); preferencesUpdate("current",    p->value().toInt() ); request->send(200, "text/plain");  });
+  server.on("/post/stall",     HTTP_POST, [](AsyncWebServerRequest *request){AsyncWebParameter *p = request->getParam(0); preferencesUpdate("stall",      p->value().toInt() ); request->send(200, "text/plain");  });
+  server.on("/post/microstep", HTTP_POST, [](AsyncWebServerRequest *request){AsyncWebParameter *p = request->getParam(0); preferencesUpdate("microstep",  p->value().toInt() ); request->send(200, "text/plain");  });
+  server.on("/post/mvlarge",   HTTP_POST, [](AsyncWebServerRequest *request){AsyncWebParameter *p = request->getParam(0); preferencesUpdate("mvlarge",    p->value().toInt() ); request->send(200, "text/plain");  });
+  server.on("/post/mvsmall",   HTTP_POST, [](AsyncWebServerRequest *request){AsyncWebParameter *p = request->getParam(0); preferencesUpdate("mvsmall",    p->value().toInt() ); request->send(200, "text/plain");  });
+  //server.on("/post/mvsmall",   HTTP_POST, [](AsyncWebServerRequest *request){AsyncWebParameter *p = request->getParam(0);Serial.printf("%s: %i \n", p->name().c_str(), p->value().toInt() ); });
+  //server.on("/post/dir",       HTTP_POST, [](AsyncWebServerRequest *request){request->send(200, "text/plain", String(dir));});
+
+  //server.on("/post/mvsmall", HTTP_POST, [](AsyncWebServerRequest *request){
+  //    serveSettings(request, true);
+  //  });
+
+  server.on("/do/minmin", HTTP_GET, [](AsyncWebServerRequest *request){ motionMINMIN(); request->send(200, "text/plain"); });
+  server.on("/do/min",    HTTP_GET, [](AsyncWebServerRequest *request){ motionMIN();    request->send(200, "text/plain"); });
+  server.on("/do/stop",   HTTP_GET, [](AsyncWebServerRequest *request){ motionSTOP();   request->send(200, "text/plain"); });
+  server.on("/do/plu",    HTTP_GET, [](AsyncWebServerRequest *request){ motionPLU();    request->send(200, "text/plain"); });
+  server.on("/do/pluplu", HTTP_GET, [](AsyncWebServerRequest *request){ motionPLUPLU(); request->send(200, "text/plain"); });
+
+  server.begin();
 }
 
 void showDriverSettings() {
@@ -201,17 +315,15 @@ void setup() {
 void loop() {
   
   if (digitalRead(BUTTON1)==HIGH) {
-    stepper.move(MOVE_FULL);
-    if (invokeAction == IDLE) {invokeAction = INIT;}
+    motionMINMIN();
   }
 
   if (digitalRead(BUTTON2)==HIGH) {
-    stepper.move(MOVE_SMALL);
-    if (invokeAction == IDLE) {invokeAction = INIT;}
+    motionMIN();
   }
 
   if (digitalRead(BUTTON3)==HIGH && invokeAction==MOVE) {
-    stepper.move(0);
+    motionSTOP();
   }
 
   if (digitalRead(BUTTON3)==HIGH && invokeAction==IDLE) {
@@ -219,13 +331,11 @@ void loop() {
   }
 
   if (digitalRead(BUTTON4)==HIGH) {
-    stepper.move(-MOVE_SMALL);
-    if (invokeAction == IDLE) {invokeAction = INIT;}
+    motionPLU();
   }
 
   if (digitalRead(BUTTON5)==HIGH) {
-    stepper.move(-MOVE_FULL);
-    if (invokeAction == IDLE) {invokeAction = INIT;}
+    motionPLUPLU();
   }
 
   if (invokeAction==STOP) {

@@ -124,7 +124,7 @@ void preferencesSetup() {
   MICROSTEPPING         = preferences.getInt("MICROSTEPPING", 16);
   MOVE_SMALL            = preferences.getInt("MOVE_SMALL", 1000);
   MOVE_FULL             = preferences.getInt("MOVE_FULL", 100000);
-  MOTOR_INVERT          = preferences.getInt("MOTOR_INVERT", 0);
+  MOTOR_INVERT          = preferences.getBool("MOTOR_INVERT", false);
 
 }
 
@@ -177,9 +177,17 @@ void preferencesUpdate( char* setting, int value ) {
   }
 
   if (strcmp( setting, "invert") == 0) {
-    MOTOR_INVERT = value;
-    preferences.putInt("MOTOR_INVERT", value);
+    if ( value == 0) {
+      MOTOR_INVERT = false;
+    }
+    if ( value == 1) {
+      MOTOR_INVERT = true;
+    }
+
+    preferences.putBool("MOTOR_INVERT", MOTOR_INVERT);
     printf("Updating %s: %u \n", setting, value);
+    driver.shaft(MOTOR_INVERT);
+
   }
 }
 
@@ -257,6 +265,7 @@ void driverSetup() {
   driver.blank_time(24);
   driver.microsteps(MICROSTEPPING);
   driver.en_spreadCycle(false);
+  driver.shaft(MOTOR_INVERT);
 
   stepper.setEnablePin(EN_PIN);
   stepper.setPinsInverted(false, false, true);

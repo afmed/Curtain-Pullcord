@@ -44,6 +44,9 @@
             $('#mvsmall_plus-btn').click(function()     {$('#mvsmall_input').val(parseInt($('#mvsmall_input').val()) + 1000 );  if ($('#mvsmall_input').val() > 10000)  {$('#mvsmall_input').val(10000);   } $.post( "/post/mvsmall",    $("#mvsmall_input").val());    });
             $('#mvsmall_minus-btn').click(function()    {$('#mvsmall_input').val(parseInt($('#mvsmall_input').val()) - 1000 );  if ($('#mvsmall_input').val() < 1000)   {$('#mvsmall_input').val(1000);    } $.post( "/post/mvsmall",    $("#mvsmall_input").val());    });
 
+
+
+
             $.get( "/get/speed",        function(data) {$("#speed_input").val( data );});
             $.get( "/get/accel",        function(data) {$("#accel_input").val( data );});
             $.get( "/get/current",      function(data) {$("#current_input").val( data );});
@@ -51,6 +54,17 @@
             $.get( "/get/microstep",    function(data) {$("#microstep_input").val( data );});
             $.get( "/get/mvlarge",      function(data) {$("#mvlarge_input").val( data );});
             $.get( "/get/mvsmall",      function(data) {$("#mvsmall_input").val( data );});
+            $.get( "/get/invert",       function(data) {
+
+                if ( data == '1' ) {
+                    $("#btn_invert").html('Forward');
+                    $("#chk_invert").prop('checked', true).change();
+                }
+                if ( data == '0' ) {
+                    $("#btn_invert").html('Reversed');
+                    $("#chk_invert").prop('checked', false).change();
+                }
+            });
 
             $('#speed_input').change(function()     { $.post( "/post/speed",      $("#speed_input").val());     });
             $('#accel_input').change(function()     { $.post( "/post/accel",      $("#accel_input").val());     });
@@ -65,7 +79,19 @@
             $('#btn_stop').click(function(){    $.get( "/do/stop");});
             $('#btn_plu').click(function(){     $.get( "/do/plu");});
             $('#btn_pluplu').click(function(){  $.get( "/do/pluplu");});
-
+            
+            $('#btn_invert').click(function(){
+                if( $("#chk_invert").prop('checked') ){
+                    $("#chk_invert").prop('checked', false).change();
+                    $("#btn_invert").html('Reversed');
+                    $.post( "/post/invert",   "0");
+                }
+                else {
+                    $("#chk_invert").prop('checked', true).change();
+                    $("#btn_invert").html('Forward');
+                    $.post( "/post/invert",   "1");
+                }
+            });
         });
 
     </script>
@@ -176,11 +202,7 @@
         <div class="row">
             <div class="w-100"></div>
             <div class="col"><h3>Invert Direction</h3> </div>
-            <div class="col">
-                <div class="input-group mb-3">
-                    <input type="checkbox" checked data-toggle="toggle" data-on="Forward" data-off="Reverse" data-onstyle="success" data-offstyle="danger" id="dir-checkbox">
-                </div>
-            </div>
+            <div class="col"><button type="button" class="btn btn-success btn-lg" id="btn_invert">...</button><input type="checkbox" id="chk_invert" style="display:none" ></div>
         </div>
    </div>
 </div>

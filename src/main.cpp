@@ -6,9 +6,8 @@
 #include "ESPAsyncWebServer.h"
 #include "SPIFFS.h"
 
-
 #if __has_include("config.hpp")
-    #include "config.hpp"
+  #include "config.hpp"
 #endif
 
 #define STEPPER_SERIAL Serial2 // TMC2209 Serial Port 
@@ -193,9 +192,7 @@ void preferencesUpdate( char* setting, int value ) {
 
 void webserverSetup() {
   
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(SPIFFS, "/index.htm", String(), false, processor);
-  });
+  server.on("/",               HTTP_GET, [](AsyncWebServerRequest *request){request->send(SPIFFS, "/index.htm", String(), false, processor); });
 
   server.on("/get/speed",      HTTP_GET, [](AsyncWebServerRequest *request){request->send(200, "text/plain", String(STEPPER_SPEED));});
   server.on("/get/accel",      HTTP_GET, [](AsyncWebServerRequest *request){request->send(200, "text/plain", String(STEPPER_ACCELERATION));});
@@ -214,11 +211,6 @@ void webserverSetup() {
   server.on("/post/mvlarge",   HTTP_POST, [](AsyncWebServerRequest *request){AsyncWebParameter *p = request->getParam(0); preferencesUpdate("mvlarge",    p->value().toInt() ); request->send(200, "text/plain");  });
   server.on("/post/mvsmall",   HTTP_POST, [](AsyncWebServerRequest *request){AsyncWebParameter *p = request->getParam(0); preferencesUpdate("mvsmall",    p->value().toInt() ); request->send(200, "text/plain");  });
   server.on("/post/invert",    HTTP_POST, [](AsyncWebServerRequest *request){AsyncWebParameter *p = request->getParam(0); preferencesUpdate("invert",     p->value().toInt() ); request->send(200, "text/plain");  });
-  //server.on("/post/mvsmall",   HTTP_POST, [](AsyncWebServerRequest *request){AsyncWebParameter *p = request->getParam(0);Serial.printf("%s: %i \n", p->name().c_str(), p->value().toInt() ); });
-
-  //server.on("/post/mvsmall", HTTP_POST, [](AsyncWebServerRequest *request){
-  //    serveSettings(request, true);
-  //  });
 
   server.on("/do/minmin", HTTP_GET, [](AsyncWebServerRequest *request){ motionMINMIN(); request->send(200, "text/plain"); });
   server.on("/do/min",    HTTP_GET, [](AsyncWebServerRequest *request){ motionMIN();    request->send(200, "text/plain"); });

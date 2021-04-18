@@ -176,7 +176,7 @@ void preferencesUpdate( char* setting, int value ) {
     printf("Updating %s: %u \n", setting, value);
   }
 
-  if (strcmp( setting, "speed") == 0) {
+  if (strcmp( setting, "invert") == 0) {
     MOTOR_INVERT = value;
     preferences.putInt("MOTOR_INVERT", value);
     printf("Updating %s: %u \n", setting, value);
@@ -196,7 +196,7 @@ void webserverSetup() {
   server.on("/get/microstep",  HTTP_GET, [](AsyncWebServerRequest *request){request->send(200, "text/plain", String(MICROSTEPPING));});
   server.on("/get/mvlarge",    HTTP_GET, [](AsyncWebServerRequest *request){request->send(200, "text/plain", String(MOVE_FULL));});
   server.on("/get/mvsmall",    HTTP_GET, [](AsyncWebServerRequest *request){request->send(200, "text/plain", String(MOVE_SMALL));});
-  //server.on("/get/dir",        HTTP_GET, [](AsyncWebServerRequest *request){request->send(200, "text/plain", String(dir));});
+  server.on("/get/invert",     HTTP_GET, [](AsyncWebServerRequest *request){request->send(200, "text/plain", String(MOTOR_INVERT));});
 
   server.on("/post/speed",     HTTP_POST, [](AsyncWebServerRequest *request){AsyncWebParameter *p = request->getParam(0); preferencesUpdate("speed",      p->value().toInt() ); request->send(200, "text/plain");  });
   server.on("/post/accel",     HTTP_POST, [](AsyncWebServerRequest *request){AsyncWebParameter *p = request->getParam(0); preferencesUpdate("accel",      p->value().toInt() ); request->send(200, "text/plain");  });
@@ -205,8 +205,8 @@ void webserverSetup() {
   server.on("/post/microstep", HTTP_POST, [](AsyncWebServerRequest *request){AsyncWebParameter *p = request->getParam(0); preferencesUpdate("microstep",  p->value().toInt() ); request->send(200, "text/plain");  });
   server.on("/post/mvlarge",   HTTP_POST, [](AsyncWebServerRequest *request){AsyncWebParameter *p = request->getParam(0); preferencesUpdate("mvlarge",    p->value().toInt() ); request->send(200, "text/plain");  });
   server.on("/post/mvsmall",   HTTP_POST, [](AsyncWebServerRequest *request){AsyncWebParameter *p = request->getParam(0); preferencesUpdate("mvsmall",    p->value().toInt() ); request->send(200, "text/plain");  });
+  server.on("/post/invert",    HTTP_POST, [](AsyncWebServerRequest *request){AsyncWebParameter *p = request->getParam(0); preferencesUpdate("invert",     p->value().toInt() ); request->send(200, "text/plain");  });
   //server.on("/post/mvsmall",   HTTP_POST, [](AsyncWebServerRequest *request){AsyncWebParameter *p = request->getParam(0);Serial.printf("%s: %i \n", p->name().c_str(), p->value().toInt() ); });
-  //server.on("/post/dir",       HTTP_POST, [](AsyncWebServerRequest *request){request->send(200, "text/plain", String(dir));});
 
   //server.on("/post/mvsmall", HTTP_POST, [](AsyncWebServerRequest *request){
   //    serveSettings(request, true);

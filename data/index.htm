@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.1/css/all.css" integrity="sha384-O8whS3fhG2OnA5Kas0Y9l3cfpmYjapjI0E4theH4iuMD+pLhbf6JI0jIMfYcK3yZ" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
+
+    <style>
+        input { text-align: center; }
+        
+        element.style {
+            width: 100%;
+            height: 38px;
+        }
+    </style>
+    <script>
+        $(document).ready(function(){
+
+
+            $('#speed_input').prop('disabled', true);
+            $('#accel_input').prop('disabled', true);
+            $('#current_input').prop('disabled', true);
+            $('#stall_input').prop('disabled', true);
+            $('#microstep_input').prop('disabled', true);
+            $('#mvlarge_input').prop('disabled', true);
+            $('#mvsmall_input').prop('disabled', true);
+
+            $('#speed_plus-btn').click(function()       {$('#speed_input').val(parseInt($('#speed_input').val()) + 100 );       if ($('#speed_input').val() > 10000)    {$('#speed_input').val(10000);     } $.post( "/post/speed",      $("#speed_input").val());      });
+            $('#speed_minus-btn').click(function()      {$('#speed_input').val(parseInt($('#speed_input').val()) - 100 );       if ($('#speed_input').val() < 1000)     {$('#speed_input').val(1000);      } $.post( "/post/speed",      $("#speed_input").val());      });
+            $('#accel_plus-btn').click(function()       {$('#accel_input').val(parseInt($('#accel_input').val()) + 1000 );      if ($('#accel_input').val() > 100000)   {$('#accel_input').val(100000);    } $.post( "/post/accel",      $("#accel_input").val());      });
+            $('#accel_minus-btn').click(function()      {$('#accel_input').val(parseInt($('#accel_input').val()) - 1000 );      if ($('#accel_input').val() < 1000)     {$('#accel_input').val(1000);      } $.post( "/post/accel",      $("#accel_input").val());      });
+            $('#current_plus-btn').click(function()     {$('#current_input').val(parseInt($('#current_input').val()) + 100 );   if ($('#current_input').val() > 2000)   {$('#current_input').val(2000);    } $.post( "/post/current",    $("#current_input").val());    });
+            $('#current_minus-btn').click(function()    {$('#current_input').val(parseInt($('#current_input').val()) - 100 );   if ($('#current_input').val() < 100)    {$('#current_input').val(100);     } $.post( "/post/current",    $("#current_input").val());    });
+            $('#stall_plus-btn').click(function()       {$('#stall_input').val(parseInt($('#stall_input').val()) + 1 );         if ($('#stall_input').val() > 255)      {$('#stall_input').val(255);       } $.post( "/post/stall",      $("#stall_input").val());      });
+            $('#stall_minus-btn').click(function()      {$('#stall_input').val(parseInt($('#stall_input').val()) - 1 );         if ($('#stall_input').val() < 1)        {$('#stall_input').val(1);         } $.post( "/post/stall",      $("#stall_input").val());      });
+            $('#microstep_plus-btn').click(function()   {$('#microstep_input').val(parseInt($('#microstep_input').val()) * 2 ); if ($('#microstep_input').val() > 64)   {$('#microstep_input').val(64);    } $.post( "/post/microstep",  $("#microstep_input").val());  });
+            $('#microstep_minus-btn').click(function()  {$('#microstep_input').val(parseInt($('#microstep_input').val()) / 2 ); if ($('#microstep_input').val() < 16)   {$('#microstep_input').val(16);    } $.post( "/post/microstep",  $("#microstep_input").val());  });
+            $('#mvlarge_plus-btn').click(function()     {$('#mvlarge_input').val(parseInt($('#mvlarge_input').val()) + 1000 );  if ($('#mvlarge_input').val() > 500000) {$('#mvlarge_input').val(500000);  } $.post( "/post/mvlarge",    $("#mvlarge_input").val());    });
+            $('#mvlarge_minus-btn').click(function()    {$('#mvlarge_input').val(parseInt($('#mvlarge_input').val()) - 1000 );  if ($('#mvlarge_input').val() < 1000)   {$('#mvlarge_input').val(1000);    } $.post( "/post/mvlarge",    $("#mvlarge_input").val());    });
+            $('#mvsmall_plus-btn').click(function()     {$('#mvsmall_input').val(parseInt($('#mvsmall_input').val()) + 1000 );  if ($('#mvsmall_input').val() > 10000)  {$('#mvsmall_input').val(10000);   } $.post( "/post/mvsmall",    $("#mvsmall_input").val());    });
+            $('#mvsmall_minus-btn').click(function()    {$('#mvsmall_input').val(parseInt($('#mvsmall_input').val()) - 1000 );  if ($('#mvsmall_input').val() < 1000)   {$('#mvsmall_input').val(1000);    } $.post( "/post/mvsmall",    $("#mvsmall_input").val());    });
+
+
+
+
+            $.get( "/get/speed",        function(data) {$("#speed_input").val( data );});
+            $.get( "/get/accel",        function(data) {$("#accel_input").val( data );});
+            $.get( "/get/current",      function(data) {$("#current_input").val( data );});
+            $.get( "/get/stall",        function(data) {$("#stall_input").val( data );});
+            $.get( "/get/microstep",    function(data) {$("#microstep_input").val( data );});
+            $.get( "/get/mvlarge",      function(data) {$("#mvlarge_input").val( data );});
+            $.get( "/get/mvsmall",      function(data) {$("#mvsmall_input").val( data );});
+            $.get( "/get/invert",       function(data) {
+
+                if ( data == '1' ) {
+                    $("#btn_invert").html('Forward');
+                    $("#chk_invert").prop('checked', true).change();
+                }
+                if ( data == '0' ) {
+                    $("#btn_invert").html('Reversed');
+                    $("#chk_invert").prop('checked', false).change();
+                }
+            });
+
+            $('#speed_input').change(function()     { $.post( "/post/speed",      $("#speed_input").val());     });
+            $('#accel_input').change(function()     { $.post( "/post/accel",      $("#accel_input").val());     });
+            $('#current_input').change(function()   { $.post( "/post/current",    $("#current_input").val());   });
+            $('#stall_input').change(function()     { $.post( "/post/stall",      $("#stall_input").val());     });
+            $('#microstep_input').change(function() { $.post( "/post/microstep",  $("#microstep_input").val()); });
+            $('#mvlarge_input').change(function()   { $.post( "/post/mvlarge",    $("#mvlarge_input").val());   });
+            $('#mvsmall_input').change(function()   { $.post( "/post/mvsmall",    $("#mvsmall_input").val());   });
+
+            $('#btn_minmin').click(function(){  $.get( "/do/minmin");});
+            $('#btn_min').click(function(){     $.get( "/do/min");});
+            $('#btn_stop').click(function(){    $.get( "/do/stop");});
+            $('#btn_plu').click(function(){     $.get( "/do/plu");});
+            $('#btn_pluplu').click(function(){  $.get( "/do/pluplu");});
+            
+            $('#btn_invert').click(function(){
+                if( $("#chk_invert").prop('checked') ){
+                    $("#chk_invert").prop('checked', false).change();
+                    $("#btn_invert").html('Reversed');
+                    $.post( "/post/invert",   "0");
+                }
+                else {
+                    $("#chk_invert").prop('checked', true).change();
+                    $("#btn_invert").html('Forward');
+                    $.post( "/post/invert",   "1");
+                }
+            });
+        });
+
+    </script>
+    <title>%TITLE%</title>
+  </head>
+  <body>
+    <div class="container" style="margin-top:10px">
+
+    <h2>Curtain Controls - %TITLE%</h2>
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="w-100"></div>
+            <div class="col" style="text-align: center;">
+                <button type="button" class="btn btn-success btn-lg" id="btn_minmin">|<</button>
+                <button type="button" class="btn btn-success btn-lg" id="btn_min"><</button>
+                <button type="button" class="btn btn-success btn-lg" id="btn_stop">STOP</button>
+                <button type="button" class="btn btn-success btn-lg" id="btn_plu">></button>
+                <button type="button" class="btn btn-success btn-lg" id="btn_pluplu">>|</button>
+            </div>
+        </div>
+
+        <div class="row">
+
+            <div class="w-100"></div>
+            <div class="col"><h3>Stepper Speed</h3> </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend"><button class="btn btn-dark btn-sm" id="speed_minus-btn"><i class="fa fa-minus"></i></button></div>
+                    <input type="number" id="speed_input" class="form-control form-control-sm" value="1" min="1">
+                    <div class="input-group-prepend"><button class="btn btn-dark btn-sm" id="speed_plus-btn"><i class="fa fa-plus"></i></button></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="w-100"></div>
+            <div class="col"><h3>Stepper Acceleration</h3> </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend"><button class="btn btn-dark btn-sm" id="accel_minus-btn"><i class="fa fa-minus"></i></button></div>
+                    <input type="number" id="accel_input" class="form-control form-control-sm" value="1" min="1">
+                    <div class="input-group-prepend"><button class="btn btn-dark btn-sm" id="accel_plus-btn"><i class="fa fa-plus"></i></button></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="w-100"></div>
+            <div class="col"><h3>RMS Current</h3> </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend"><button class="btn btn-dark btn-sm" id="current_minus-btn"><i class="fa fa-minus"></i></button></div>
+                    <input type="number" id="current_input" class="form-control form-control-sm" value="1" min="1">
+                    <div class="input-group-prepend"><button class="btn btn-dark btn-sm" id="current_plus-btn"><i class="fa fa-plus"></i></button></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="w-100"></div>
+            <div class="col"><h3>Stallguard Threshold</h3> </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend"><button class="btn btn-dark btn-sm" id="stall_minus-btn"><i class="fa fa-minus"></i></button></div>
+                    <input type="number" id="stall_input" class="form-control form-control-sm" value="1" min="1">
+                    <div class="input-group-prepend"><button class="btn btn-dark btn-sm" id="stall_plus-btn"><i class="fa fa-plus"></i></button></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="w-100"></div>
+            <div class="col"><h3>Microstepping</h3> </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend"><button class="btn btn-dark btn-sm" id="microstep_minus-btn"><i class="fa fa-minus"></i></button></div>
+                    <input type="number" id="microstep_input" class="form-control form-control-sm" value="1" min="1">
+                    <div class="input-group-prepend"><button class="btn btn-dark btn-sm" id="microstep_plus-btn"><i class="fa fa-plus"></i></button></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="w-100"></div>
+            <div class="col"><h3>Move amount - Large</h3> </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend"><button class="btn btn-dark btn-sm" id="mvlarge_minus-btn"><i class="fa fa-minus"></i></button></div>
+                    <input type="number" id="mvlarge_input" class="form-control form-control-sm" value="1" min="1">
+                    <div class="input-group-prepend"><button class="btn btn-dark btn-sm" id="mvlarge_plus-btn"><i class="fa fa-plus"></i></button></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="w-100"></div>
+            <div class="col"><h3>Move amount - Small</h3> </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend"><button class="btn btn-dark btn-sm" id="mvsmall_minus-btn"><i class="fa fa-minus"></i></button></div>
+                    <input type="number" id="mvsmall_input" class="form-control form-control-sm" value="1" min="1">
+                    <div class="input-group-prepend"><button class="btn btn-dark btn-sm" id="mvsmall_plus-btn"><i class="fa fa-plus"></i></button></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="w-100"></div>
+            <div class="col"><h3>Invert Direction</h3> </div>
+            <div class="col"><button type="button" class="btn btn-success btn-lg" id="btn_invert">...</button><input type="checkbox" id="chk_invert" style="display:none" ></div>
+        </div>
+   </div>
+</div>
+
+   <hr>
+  </body>
+</html>
